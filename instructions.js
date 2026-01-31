@@ -11,8 +11,8 @@
 // drawInstr() is called from main.js
 // only when currentScreen === "instr"
 function drawInstr() {
-  // Light neutral background
-  background(240);
+  // dusk blue background
+  background(53, 80, 112);
 
   // ---- Screen title ----
   fill(0);
@@ -26,7 +26,7 @@ function drawInstr() {
   // \n creates a line break in the text
   // This is useful for simple multi-line instructions
   const lines =
-    "Press the game button.\n" + "You have a chance to win or lose!";
+    "Press the start button.\n" + "Find as many circles as possible!";
 
   text(lines, width / 2, 160);
 

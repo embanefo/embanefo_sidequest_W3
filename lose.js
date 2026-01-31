@@ -10,8 +10,8 @@
 // drawLose() is called from main.js
 // only when currentScreen === "lose"
 function drawLose() {
-  // Red-tinted background to communicate failure
-  background(255, 210, 210);
+  // dusty lavendar
+  background(109, 89, 122);
 
   fill(0);
   textAlign(CENTER, CENTER);

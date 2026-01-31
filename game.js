@@ -20,36 +20,57 @@ const gameBtn = {
   label: "PRESS HERE", // text shown on the button
 };
 
+const endBtn = {
+  x: 400,
+  y: 700,
+  w: 220,
+  h: 70,
+  label: "END GAME",
+};
+
+let gameStarted = false;
+let x, y;
+let r = 40;
+
 // ------------------------------
 // Main draw function for this screen
 // ------------------------------
 // drawGame() is called from main.js *only*
 // when currentScreen === "game"
 function drawGame() {
-  // Set background colour for the game screen
-  background(240, 230, 140);
+  background(181, 101, 118);
 
-  // ---- Title and instructions text ----
-  fill(0); // black text
+  fill(0);
   textSize(32);
   textAlign(CENTER, CENTER);
   text("Game Screen", width / 2, 160);
 
   textSize(18);
-  text(
-    "Click the button (or press ENTER) for a random result.",
-    width / 2,
-    210,
-  );
 
-  // ---- Draw the button ----
-  // We pass the button object to a helper function
-  drawGameButton(gameBtn);
+  if (!gameStarted) {
+    text("Click the button to begin.", width / 2, 210);
 
-  // ---- Cursor feedback ----
-  // If the mouse is over the button, show a hand cursor
-  // Otherwise, show the normal arrow cursor
-  cursor(isHover(gameBtn) ? HAND : ARROW);
+    // Draw button ONLY before the game starts
+    drawGameButton(gameBtn);
+
+    // Cursor changes only for button hover
+    cursor(isHover(gameBtn) ? HAND : ARROW);
+    return; // stop here so circle doesn't draw yet
+  }
+
+  // After game starts:
+  text("Click the circle to spawn the next one.", width / 2, 210);
+
+  // Draw the circle target
+  fill(255, 0, 0);
+  circle(x, y, r * 2);
+
+  drawGameButton(endBtn);
+
+  // Cursor becomes a hand when hovering the circle or the button
+  const overCircle = dist(mouseX, mouseY, x, y) < r;
+  const overEndBtn = isHover(endBtn);
+  cursor(overCircle || overEndBtn ? HAND : ARROW);
 }
 
 // ------------------------------
@@ -91,9 +112,21 @@ function drawGameButton({ x, y, w, h, label }) {
 // only when currentScreen === "game"
 function gameMousePressed() {
   // Only trigger the outcome if the button is clicked
-  if (isHover(gameBtn)) {
-    triggerRandomOutcome();
+  if (!gameStarted) {
+    if (isHover(gameBtn)) {
+      gameStarted = true;
+      newTarget();
+    }
+    return;
   }
+
+  if (isHover(endBtn)) {
+    currentScreen = "lose";
+    return;
+  }
+
+  // After start: clicking the circle spawns the next one
+  checkhit(mouseX, mouseY);
 }
 
 // ------------------------------
@@ -101,28 +134,31 @@ function gameMousePressed() {
 // ------------------------------
 // Allows keyboard-only interaction (accessibility + design)
 function gameKeyPressed() {
-  // ENTER key triggers the same behaviour as clicking the button
-  if (keyCode === ENTER) {
-    triggerRandomOutcome();
+  if (!gameStarted && keyCode === ENTER) {
+    gameStarted = true;
+    newTarget();
+    return;
+  }
+
+  if (gameStarted && keyCode === ENTER) {
+    checkhit(mouseX, mouseY);
   }
 }
 
 // ------------------------------
-// Game logic: win or lose
+// Game logic: click the circle
 // ------------------------------
 // This function decides what happens next in the game.
 // It does NOT draw anything.
-function triggerRandomOutcome() {
-  // random() returns a value between 0 and 1
-  // Here we use a 50/50 chance:
-  // - less than 0.5 → win
-  // - 0.5 or greater → lose
-  //
-  // You can bias this later, for example:
-  // random() < 0.7 → 70% chance to win
-  if (random() < 0.5) {
-    currentScreen = "win";
-  } else {
-    currentScreen = "lose";
+function checkhit(mx, my) {
+  //check if the circle
+  let d = dist(mx, my, x, y);
+  if (d < r) {
+    newTarget();
   }
+}
+
+function newTarget() {
+  x = random(r, width - r);
+  y = random(r, height - r);
 }
